@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nauka niemieckiego – Aplikacja</title>
 <style>
     /* Ogólne */
@@ -118,32 +119,15 @@
         .char-btn { font-size: 14px; width: 40px; }
     }
 
-    /* Bardzo czytelna wersja na urządzenia mobilne */
+</style>
+    /* Powiększenie całej aplikacji na telefonach */
     @media (max-width: 480px) {
         #app {
-            padding: 30px;
-        }
-        h2 { font-size: 2.2rem; }
-        .word { font-size: 2rem; }
-        .translation { font-size: 1.8rem; }
-        .small { font-size: 1.5rem; }
-        .example { font-size: 1.6rem; }
-        button {
-            font-size: 22px;
-            padding: 18px 22px;
-            margin: 8px 0;
-        }
-        input[type="text"] {
-            font-size: 22px;
-            padding: 18px;
-        }
-        .char-btn {
-            font-size: 22px;
-            width: 60px;
-            padding: 14px 0;
-            margin: 3px 4px 10px 4px;
+            transform: scale(1.3);
+            transform-origin: top center;
         }
     }
+</style>
 </style>
 </head>
 <body>
