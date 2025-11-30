@@ -4,35 +4,43 @@
 <meta charset="UTF-8" />
 <title>Nauka niemieckiego – Aplikacja</title>
 <style>
+    /* Ogólne */
     body {
         font-family: Arial, sans-serif;
         background: #eef2f3;
         margin: 0;
         display: flex;
-        height: 100vh;
         align-items: center;
         justify-content: center;
+        min-height: 100vh;
+        padding: 10px;
+        box-sizing: border-box;
     }
+
     #app {
-        width: 480px;
+        width: 100%;
+        max-width: 480px;
         background: white;
-        padding: 30px;
+        padding: 20px;
         border-radius: 18px;
         box-shadow: 0 0 25px rgba(0,0,0,0.15);
         text-align: center;
+        box-sizing: border-box;
     }
-    h2 { margin-bottom: 20px; }
+
+    h2 { margin-bottom: 20px; font-size: 1.5rem; }
 
     button {
         padding: 12px 16px;
-        font-size: 17px;
+        font-size: 16px;
         margin: 6px 0;
-        width: 90%;
+        width: 100%;
         border-radius: 10px;
         border: none;
         cursor: pointer;
         background: #007bff;
         color: white;
+        box-sizing: border-box;
     }
     button:hover { background: #0056b3; }
 
@@ -41,16 +49,33 @@
         margin-top: 12px;
     }
 
-    .word { font-size: 27px; font-weight: bold; margin-bottom: 10px; }
-    .translation { font-size: 22px; margin: 10px 0; color: #333; }
+    .word { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; word-wrap: break-word; }
+    .translation { font-size: 1.2rem; margin: 10px 0; color: #333; word-wrap: break-word; }
     .option { background: #ddd; color: black; }
     .correct { background: #4caf50 !important; color: white !important; }
     .wrong { background: #f44336 !important; color: white !important; }
 
-    .small { font-size: 14px; color: #666; margin-bottom: 10px; }
-    .example { margin-top: 10px; color: #444; font-style: italic; }
+    .small { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+    .example { margin-top: 10px; color: #444; font-style: italic; word-wrap: break-word; }
 
-    /* Intelligent Feedback Box styles */
+    /* Przyciski do niemieckich znaków */
+    .char-btn {
+        width: 45px;
+        padding: 8px 0;
+        margin: 2px 3px 8px 3px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    input[type="text"] {
+        padding: 10px;
+        width: 100%;
+        font-size: 16px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+
+    /* Intelligent Feedback Box */
     #intelligentBoxOverlay {
         position: fixed;
         top: 0;
@@ -62,30 +87,35 @@
         align-items: center;
         justify-content: center;
         z-index: 1000;
+        padding: 10px;
+        box-sizing: border-box;
     }
+
     #intelligentBox {
         background: white;
-        padding: 25px 30px;
+        padding: 20px 25px;
         border-radius: 15px;
         max-width: 400px;
+        width: 100%;
         box-shadow: 0 0 20px rgba(0,0,0,0.3);
         text-align: center;
         font-family: Arial, sans-serif;
     }
-    #intelligentBox .word {
-        font-size: 28px;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-    #intelligentBox .translation {
-        font-size: 22px;
-        color: #333;
-        margin-bottom: 15px;
-    }
-    #intelligentBox .additionalInfo {
-        font-size: 16px;
-        color: #555;
-        font-style: italic;
+    #intelligentBox .word { font-size: 1.5rem; margin-bottom: 8px; }
+    #intelligentBox .translation { font-size: 1.2rem; color: #333; margin-bottom: 15px; }
+    #intelligentBox .additionalInfo { font-size: 1rem; color: #555; font-style: italic; }
+
+    /* Responsive dla małych ekranów */
+    @media (max-width: 400px) {
+        #app {
+            padding: 15px;
+        }
+        h2 { font-size: 1.2rem; }
+        .word { font-size: 1.3rem; }
+        .translation { font-size: 1rem; }
+        button { font-size: 15px; }
+        input[type="text"] { font-size: 15px; }
+        .char-btn { font-size: 14px; width: 40px; }
     }
 </style>
 </head>
