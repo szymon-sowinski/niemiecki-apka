@@ -489,35 +489,26 @@ function checkAnswerCard(btn, correct) {
     if (btn.innerText === correct) {
         btn.classList.add("correct");
         quizCardScore++;
-        const wObj = words.find(w => w[0] === correct);
-        showIntelligentBox(wObj, () => {
-            quizCardIndex++;
-            nextQuizCard();
-        });
     } else {
         btn.classList.add("wrong");
-        // allow user to try again or move on after short delay
-        setTimeout(() => {
-            quizCardIndex++;
-            nextQuizCard();
-        }, 1500);
     }
+    // przejdź do następnego słówka po krótkiej przerwie
+    setTimeout(() => {
+        quizCardIndex++;
+        nextQuizCard();
+    }, 500);
 }
 
 function checkTestAnswerCard(correct) {
     const user = document.getElementById("inputQuizCard").value.trim().toLowerCase();
-    const wObj = words.find(w => w[0] === correct);
     if (user === correct.toLowerCase()) {
         quizCardScore++;
-        showIntelligentBox(wObj, () => {
-            quizCardIndex++;
-            nextQuizCard();
-        });
-    } else {
-        alert("❌ ŹLE!\nPoprawna odpowiedź: " + correct);
+    }
+    // niezależnie od wyniku przejdź do następnego słówka po krótkiej przerwie
+    setTimeout(() => {
         quizCardIndex++;
         nextQuizCard();
-    }
+    }, 500);
 }
 
 function showCardResult() {
