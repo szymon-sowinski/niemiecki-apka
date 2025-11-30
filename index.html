@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Nauka niemieckiego – Aplikacja</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #eef2f3;
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+    }
+    #app {
+        width: 480px;
+        background: white;
+        padding: 30px;
+        border-radius: 18px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.15);
+        text-align: center;
+    }
+    h2 { margin-bottom: 20px; }
+
+    button {
+        padding: 12px 16px;
+        font-size: 17px;
+        margin: 6px 0;
+        width: 90%;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+    }
+    button:hover { background: #0056b3; }
+
+    .back {
+        background: #444 !important;
+        margin-top: 12px;
+    }
+
+    .word { font-size: 27px; font-weight: bold; margin-bottom: 10px; }
+    .translation { font-size: 22px; margin: 10px 0; color: #333; }
+    .option { background: #ddd; color: black; }
+    .correct { background: #4caf50 !important; color: white !important; }
+    .wrong { background: #f44336 !important; color: white !important; }
+
+    .small { font-size: 14px; color: #666; margin-bottom: 10px; }
+    .example { margin-top: 10px; color: #444; font-style: italic; }
+
+    /* Intelligent Feedback Box styles */
+    #intelligentBoxOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    #intelligentBox {
+        background: white;
+        padding: 25px 30px;
+        border-radius: 15px;
+        max-width: 400px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+    #intelligentBox .word {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+    #intelligentBox .translation {
+        font-size: 22px;
+        color: #333;
+        margin-bottom: 15px;
+    }
+    #intelligentBox .additionalInfo {
+        font-size: 16px;
+        color: #555;
+        font-style: italic;
+    }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// -------------------------
+// BAZA SŁÓWEK
+// -------------------------
+const words = [
+["das Abi","matura","",""],
+["die Anzeige","ogłoszenie","",""],
+["die Arbeitsstunde","godzina pracy","",""],
+["die Aushilfe","pomoc, pomocnik","",""],
+["außerdem","oprócz tego","",""],
+["ohne Barrieren","bez barier","",""],
+["der Bereich","zakres, obszar","",""],
+["die Berufs- und Studienorientierung","orientacja dotycząca zawodu i kierunku studiów","",""],
+["das Berufsinformationszentrum","centrum orientacji zawodowej","",""],
+["die Bewerbung","podanie o pracę","",""],
+["die Bezahlung","zapłata","",""],
+["der Briefumschlag","koperta","",""],
+["darum","dlatego","",""],
+["der Diebstahl","kradzież","",""],
+["die Eisdiele","lodziarnia","",""],
+["der Fahrgast","pasażer","",""],
+["die Ferienschwimmschule","letnia szkółka pływania","",""],
+["sich Gedanken machen","zastanawiać się","",""],
+["die Gerechtigkeit","sprawiedliwość","",""],
+["das Gericht","sąd","",""],
+["die Hektik","pośpiech","",""],
+["der Held","bohater","",""],
+["im In- und Ausland","w kraju i za granicą","",""],
+["das Jura","prawo (kierunek studiów)","",""],
+["das Klischee","stereotyp","",""],
+["den Knopf drücken","naciskać guzik","",""],
+["Kontakte aufnehmen","nawiązywać kontakty","",""],
+["der Kopierer","kopiarka","",""],
+["der Kriminalfall","sprawa kryminalna","",""],
+["der Kunde","klient","",""],
+["die Prüfung","egzamin","",""],
+["im Rahmen","w ramach","",""],
+["die Saisonstelle","posada sezonowa","",""],
+["die Schichtarbeit","praca w systemie zmianowym","",""],
+["schließlich","w końcu","",""],
+["der Schulabschluss","ukończenie szkoły","",""],
+["die Schwäche","słaba strona, słabość","",""],
+["das Softwareprogramm entwickeln","opracowywać oprogramowanie","",""],
+["die Sommersaison","sezon letni","",""],
+["sonst","w przeciwnym razie","",""],
+["die Sportakademie","Akademia Sportu","",""],
+["das Sportmanagement","kierownictwo sportu","",""],
+["die Stärke","mocna strona","",""],
+["Stärken zeigen","pokazywać mocne strony","",""],
+["die Stelle","posada","",""],
+["mit Stress umgehen","obchodzić się ze stresem","",""],
+["das Studienangebot","oferta studiów","",""],
+["das Studium abschließen","ukończyć studia","",""],
+["die Tourismusbranche","branża turystyczna","",""],
+["die Touristikagentur","agencja turystyczna","",""],
+["Unterkunft und Verpflegung","nocleg i wyżywienie","",""],
+["die Versicherung","ubezpieczenie","",""],
+["der Vorteil","zaleta","",""],
+["der Wandel","zmiana, przemiana","",""],
+["der Zukunftsplan","plan na przyszłość","",""]
+];
+
+// rest of the code unchanged
+let difficult = []; // lista trudnych słówek
+
+let current = 0;
+
+// -------------------------
+// GENEROWANIE MENU
+// -------------------------
+function showMenu() {
+    app.innerHTML = `
+        <h2>MENU GŁÓWNE</h2>
+        <button onclick="startLearning()">📘 Nauka</button>
+        <button onclick="startQuiz()">🧩 Quiz – 4 opcje</button>
+        <button onclick="startTest()">✍ Test – wpisywanie</button>
+        <button onclick="startDifficult()">⚠ Powtórka trudnych</button>
+        <button onclick="startEasy()">😊 Tryb łatwy</button>
+        <button onclick="startSpaced()">⏳ Powtórki inteligentne</button>
+        <button onclick="startInterleave()">🔀 Mieszany tryb nauki</button>
+        <button onclick="startQuizCard()">📝 Kartkówka</button>
+    `;
+}
+
+// -------------------------
+// FUNKCJE POMOCNICZE
+// -------------------------
+function randomWord(list = words) {
+    current = Math.floor(Math.random() * list.length);
+    return list[current];
+}
+
+// Helper to add a German character to input field
+function addGermanChar(char, inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        // Insert char at cursor position
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const value = input.value;
+        input.value = value.substring(0, start) + char + value.substring(end);
+        // Move cursor after inserted char
+        input.selectionStart = input.selectionEnd = start + char.length;
+        input.focus();
+    }
+}
+
+// -------------------------
+// TRYB 1 — NAUKA
+// -------------------------
+function startLearning() {
+    const w = randomWord();
+    app.innerHTML = `
+        <h2>📘 Nauka</h2>
+        <div class="word">${w[1]}</div>
+        <div class="small">Tłumaczenie:</div>
+        <div class="translation">${w[0]}</div>
+
+        <button onclick="startLearning()">Następne słówko</button>
+        <button onclick="markDifficult('${w[0]}')">Dodaj do trudnych</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function markDifficult(word) {
+    if (!difficult.includes(word)) difficult.push(word);
+    alert("Dodano do trudnych ✔");
+}
+
+// -------------------------
+// TRYB 2 — QUIZ
+// -------------------------
+function startQuiz() {
+    const w = randomWord();
+    const correct = w[0];
+
+    let answers = [correct];
+    while (answers.length < 4) {
+        const r = words[Math.floor(Math.random() * words.length)][0];
+        if (!answers.includes(r)) answers.push(r);
+    }
+    answers.sort(() => Math.random() - 0.5);
+
+    app.innerHTML = `
+        <h2>🧩 Quiz – wybierz</h2>
+        <div class="word">${w[1]}</div>
+
+        ${answers.map(a => `<button class="option" onclick="checkAnswer(this,'${correct}')">${a}</button>`).join("")}
+
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function checkAnswer(btn, correct) {
+    if (btn.innerText === correct) {
+        btn.classList.add("correct");
+        // find current word object
+        const wObj = words.find(w => w[0] === correct);
+        showIntelligentBox(wObj, startQuiz);
+    } else {
+        btn.classList.add("wrong");
+    }
+}
+
+// -------------------------
+// TRYB 3 — TEST
+// -------------------------
+function startTest() {
+    const w = randomWord();
+    app.innerHTML = `
+        <h2>✍ Test</h2>
+        <div class="word">${w[1]}</div>
+        <div style="margin-bottom: 8px;">
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ä','inputTest')">ä</button>
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ö','inputTest')">ö</button>
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ü','inputTest')">ü</button>
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ß','inputTest')">ß</button>
+        </div>
+        <input id="inputTest" type="text" placeholder="Twoja odpowiedź" style="padding:10px;width:90%;font-size:18px;">
+        <button onclick="checkTestAnswer('${w[0]}')">Sprawdź</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function checkTestAnswer(correct) {
+    const user = document.getElementById("inputTest").value.trim().toLowerCase();
+    const wObj = words.find(w => w[0] === correct);
+
+    if (user === correct.toLowerCase()) {
+        showIntelligentBox(wObj, startTest);
+    } else {
+        alert("❌ ŹLE!\nPoprawna odpowiedź: " + correct);
+    }
+}
+
+// -------------------------
+// TRYB 4 — TRUDNE
+// -------------------------
+function startDifficult() {
+    if (difficult.length === 0) {
+        alert("Nie masz trudnych słówek!");
+        return showMenu();
+    }
+
+    const found = words.find(w => w[0] === difficult[Math.floor(Math.random() * difficult.length)]);
+
+    app.innerHTML = `
+        <h2>⚠ Trudne słowa</h2>
+        <div class="word">${found[1]}</div>
+        <div class="translation">${found[0]}</div>
+        <div class="example">${found[3]}</div>
+
+        <button onclick="startDifficult()">Następne</button>
+        <button onclick="removeDifficult('${found[0]}')">Usuń z trudnych</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function removeDifficult(w) {
+    difficult = difficult.filter(x => x !== w);
+    alert("Usunięto ✔");
+    startDifficult();
+}
+
+// -------------------------
+// TRYB 5 — ŁATWE
+// -------------------------
+function startEasy() {
+    const easyList = words.slice(0, 10);
+    const w = randomWord(easyList);
+
+    app.innerHTML = `
+        <h2>😊 Tryb łatwy</h2>
+        <div class="word">${w[1]}</div>
+        <div class="translation">${w[0]}</div>
+        <div class="example">${w[3]}</div>
+
+        <button onclick="startEasy()">Następne</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+// -------------------------
+// ZAAWANSOWANE METODY NAUKI
+// -------------------------
+var stats = {
+    scores: {},
+    history: []
+};
+
+function spacedRepetitionPick() {
+    const difficultyWeights = words.map(w => {
+        const score = stats.scores[w[0]] || 0;
+        return Math.max(1, 10 - score);
+    });
+    const total = difficultyWeights.reduce((a,b)=>a+b,0);
+    let r = Math.random() * total;
+    for (let i=0;i<words.length;i++){
+        if (r < difficultyWeights[i]) return words[i];
+        r -= difficultyWeights[i];
+    }
+    return words[0];
+}
+
+function startSpaced() {
+    const w = spacedRepetitionPick();
+    current = words.indexOf(w);
+    app.innerHTML = `
+        <h2>⏳ Powtórki inteligentne</h2>
+        <div class="word">${w[1]}</div>
+        <button onclick="showSpacedAnswer('${w[0]}')">Pokaż odpowiedź</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function showSpacedAnswer(correct) {
+    const w = words[current];
+    app.innerHTML = `
+        <h2>⏳ Spaced Repetition</h2>
+        <div class="word">${w[1]}</div>
+        <div class="translation">${correct}</div>
+        <button onclick="rateSpaced(1)">❌ Trudne</button>
+        <button onclick="rateSpaced(2)">👌 OK</button>
+        <button onclick="rateSpaced(3)">✔ Łatwe</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function rateSpaced(level){
+    const key = words[current][0];
+    if (!stats.scores[key]) stats.scores[key] = 0;
+    stats.scores[key] += (level - 2); 
+    if (stats.scores[key] < 0) stats.scores[key] = 0;
+    startSpaced();
+}
+
+function startInterleave() {
+    const w = randomWord();
+    const type = Math.random() < 0.5 ? 'mc' : 'write';
+    if (type === 'mc') {
+        startQuiz();
+    } else {
+        startTest();
+    }
+}
+
+// -------------------------
+// INTELLIGENT FEEDBACK BOX
+// -------------------------
+function showIntelligentBox(wordObj, callback) {
+    // Create overlay div
+    const overlay = document.createElement('div');
+    overlay.id = 'intelligentBoxOverlay';
+
+    // Create box div
+    const box = document.createElement('div');
+    box.id = 'intelligentBox';
+
+    // Content inside box: German word, Polish translation, additional info placeholder
+    box.innerHTML = `
+        <div class="word">${wordObj[1]}</div>
+        <div class="translation">${wordObj[0]}</div>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+        document.body.removeChild(overlay);
+        if (typeof callback === 'function') callback();
+    }, 3500);
+}
+
+// -------------------------
+// TRYB 6 — KARTKÓWKA
+// -------------------------
+let quizCardWords = [];
+let quizCardIndex = 0;
+let quizCardScore = 0;
+
+function startQuizCard() {
+    const minWords = 20;
+    const maxWords = 20;
+    const count = Math.min(words.length, Math.floor(Math.random() * (maxWords - minWords + 1)) + minWords);
+    // Shuffle words and slice count
+    quizCardWords = words.slice().sort(() => 0.5 - Math.random()).slice(0, count);
+    quizCardIndex = 0;
+    quizCardScore = 0;
+    nextQuizCard();
+}
+
+function nextQuizCard() {
+    if (quizCardIndex >= quizCardWords.length) {
+        showCardResult();
+        return;
+    }
+    const w = quizCardWords[quizCardIndex];
+    // Randomly decide quiz or input test
+    const mode = Math.random() < 0.5 ? 'quiz' : 'test';
+    if (mode === 'quiz') {
+        const correct = w[0];
+        let answers = [correct];
+        while (answers.length < 4) {
+            const r = words[Math.floor(Math.random() * words.length)][0];
+            if (!answers.includes(r)) answers.push(r);
+        }
+        answers.sort(() => Math.random() - 0.5);
+        app.innerHTML = `
+            <h2>📝 Kartkówka (${quizCardIndex+1}/${quizCardWords.length}) - Quiz</h2>
+            <div class="word">${w[1]}</div>
+            ${answers.map(a => `<button class="option" onclick="checkAnswerCard(this,'${correct}')">${a}</button>`).join("")}
+            <button class="back" onclick="showMenu()">⏪ Menu</button>
+        `;
+    } else {
+        renderQuizCardTest(w, quizCardIndex, quizCardWords.length);
+    }
+}
+
+function renderQuizCardTest(w, idx, total) {
+    app.innerHTML = `
+        <h2>📝 Kartkówka (${idx+1}/${total}) - Test</h2>
+        <div class="word">${w[1]}</div>
+        <div style="margin-bottom: 8px;">
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ä','inputQuizCard')">ä</button>
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ö','inputQuizCard')">ö</button>
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ü','inputQuizCard')">ü</button>
+            <button type="button" style="width:40px;padding:8px 0;margin:2px 3px 8px 3px;font-size:18px;" onclick="addGermanChar('ß','inputQuizCard')">ß</button>
+        </div>
+        <input id="inputQuizCard" type="text" placeholder="Twoja odpowiedź" style="padding:10px;width:90%;font-size:18px;">
+        <button onclick="checkTestAnswerCard('${w[0]}')">Sprawdź</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+function checkAnswerCard(btn, correct) {
+    if (btn.innerText === correct) {
+        btn.classList.add("correct");
+        quizCardScore++;
+        const wObj = words.find(w => w[0] === correct);
+        showIntelligentBox(wObj, () => {
+            quizCardIndex++;
+            nextQuizCard();
+        });
+    } else {
+        btn.classList.add("wrong");
+        // allow user to try again or move on after short delay
+        setTimeout(() => {
+            quizCardIndex++;
+            nextQuizCard();
+        }, 1500);
+    }
+}
+
+function checkTestAnswerCard(correct) {
+    const user = document.getElementById("inputQuizCard").value.trim().toLowerCase();
+    const wObj = words.find(w => w[0] === correct);
+    if (user === correct.toLowerCase()) {
+        quizCardScore++;
+        showIntelligentBox(wObj, () => {
+            quizCardIndex++;
+            nextQuizCard();
+        });
+    } else {
+        alert("❌ ŹLE!\nPoprawna odpowiedź: " + correct);
+        quizCardIndex++;
+        nextQuizCard();
+    }
+}
+
+function showCardResult() {
+    const total = quizCardWords.length;
+    const percent = ((quizCardScore / total) * 100).toFixed(1);
+    app.innerHTML = `
+        <h2>📝 Kartkówka - Wynik</h2>
+        <div class="small">Poprawne odpowiedzi: <strong>${quizCardScore}</strong> / ${total}</div>
+        <div class="small">Procent: <strong>${percent}%</strong></div>
+        <button onclick="startQuizCard()">🔄 Spróbuj ponownie</button>
+        <button class="back" onclick="showMenu()">⏪ Menu</button>
+    `;
+}
+
+// Start aplikacji
+showMenu();
+</script>
+</body>
+</html>
