@@ -59,7 +59,6 @@
     .small { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
     .example { margin-top: 10px; color: #444; font-style: italic; word-wrap: break-word; }
 
-    /* Przyciski do niemieckich znaków */
     .char-btn {
         width: 45px;
         padding: 8px 0;
@@ -76,7 +75,6 @@
         margin-bottom: 10px;
     }
 
-    /* Intelligent Feedback Box */
     #intelligentBoxOverlay {
         position: fixed;
         top: 0;
@@ -118,9 +116,6 @@
 <div id="app"></div>
 
 <script>
-// -------------------------
-// BAZA SŁÓWEK
-// -------------------------
 const words = [
 ["das Abi","matura","",""],
 ["die Anzeige","ogłoszenie","",""],
@@ -179,14 +174,10 @@ const words = [
 ["der Zukunftsplan","plan na przyszłość","",""]
 ];
 
-// rest of the code unchanged
-let difficult = []; // lista trudnych słówek
+let difficult = [];
 
 let current = 0;
-
-// -------------------------
-// GENEROWANIE MENU
-// -------------------------
+    
 function showMenu() {
     app.innerHTML = `
         <h2>MENU GŁÓWNE</h2>
@@ -200,33 +191,25 @@ function showMenu() {
         <button onclick="startQuizCard()">📝 Kartkówka</button>
     `;
 }
-
-// -------------------------
-// FUNKCJE POMOCNICZE
-// -------------------------
+    
 function randomWord(list = words) {
     current = Math.floor(Math.random() * list.length);
     return list[current];
 }
 
-// Helper to add a German character to input field
 function addGermanChar(char, inputId) {
     const input = document.getElementById(inputId);
     if (input) {
-        // Insert char at cursor position
         const start = input.selectionStart;
         const end = input.selectionEnd;
         const value = input.value;
         input.value = value.substring(0, start) + char + value.substring(end);
-        // Move cursor after inserted char
         input.selectionStart = input.selectionEnd = start + char.length;
         input.focus();
     }
 }
 
-// -------------------------
-// TRYB 1 — NAUKA
-// -------------------------
+
 function startLearning() {
     const w = randomWord();
     app.innerHTML = `
@@ -246,9 +229,6 @@ function markDifficult(word) {
     alert("Dodano do trudnych ✔");
 }
 
-// -------------------------
-// TRYB 2 — QUIZ
-// -------------------------
 function startQuiz() {
     const w = randomWord();
     const correct = w[0];
@@ -281,9 +261,6 @@ function checkAnswer(btn, correct) {
     }
 }
 
-// -------------------------
-// TRYB 3 — TEST
-// -------------------------
 function startTest() {
     const w = randomWord();
     app.innerHTML = `
@@ -312,9 +289,6 @@ function checkTestAnswer(correct) {
     }
 }
 
-// -------------------------
-// TRYB 4 — TRUDNE
-// -------------------------
 function startDifficult() {
     if (difficult.length === 0) {
         alert("Nie masz trudnych słówek!");
@@ -341,9 +315,6 @@ function removeDifficult(w) {
     startDifficult();
 }
 
-// -------------------------
-// TRYB 5 — ŁATWE
-// -------------------------
 function startEasy() {
     const easyList = words.slice(0, 10);
     const w = randomWord(easyList);
@@ -358,9 +329,7 @@ function startEasy() {
         <button class="back" onclick="showMenu()">⏪ Menu</button>
     `;
 }
-// -------------------------
-// ZAAWANSOWANE METODY NAUKI
-// -------------------------
+
 var stats = {
     scores: {},
     history: []
@@ -422,19 +391,13 @@ function startInterleave() {
     }
 }
 
-// -------------------------
-// INTELLIGENT FEEDBACK BOX
-// -------------------------
 function showIntelligentBox(wordObj, callback) {
-    // Create overlay div
     const overlay = document.createElement('div');
     overlay.id = 'intelligentBoxOverlay';
 
-    // Create box div
     const box = document.createElement('div');
     box.id = 'intelligentBox';
 
-    // Content inside box: German word, Polish translation, additional info placeholder
     box.innerHTML = `
         <div class="word">${wordObj[1]}</div>
         <div class="translation">${wordObj[0]}</div>
@@ -449,9 +412,6 @@ function showIntelligentBox(wordObj, callback) {
     }, 3500);
 }
 
-// -------------------------
-// TRYB 6 — KARTKÓWKA
-// -------------------------
 let quizCardWords = [];
 let quizCardIndex = 0;
 let quizCardScore = 0;
@@ -460,7 +420,6 @@ function startQuizCard() {
     const minWords = 20;
     const maxWords = 20;
     const count = Math.min(words.length, Math.floor(Math.random() * (maxWords - minWords + 1)) + minWords);
-    // Shuffle words and slice count
     quizCardWords = words.slice().sort(() => 0.5 - Math.random()).slice(0, count);
     quizCardIndex = 0;
     quizCardScore = 0;
@@ -473,7 +432,6 @@ function nextQuizCard() {
         return;
     }
     const w = quizCardWords[quizCardIndex];
-    // Randomly decide quiz or input test
     const mode = Math.random() < 0.5 ? 'quiz' : 'test';
     if (mode === 'quiz') {
         const correct = w[0];
@@ -517,7 +475,6 @@ function checkAnswerCard(btn, correct) {
     } else {
         btn.classList.add("wrong");
     }
-    // przejdź do następnego słówka po krótkiej przerwie
     setTimeout(() => {
         quizCardIndex++;
         nextQuizCard();
@@ -529,7 +486,6 @@ function checkTestAnswerCard(correct) {
     if (user === correct.toLowerCase()) {
         quizCardScore++;
     }
-    // niezależnie od wyniku przejdź do następnego słówka po krótkiej przerwie
     setTimeout(() => {
         quizCardIndex++;
         nextQuizCard();
@@ -548,7 +504,6 @@ function showCardResult() {
     `;
 }
 
-// Start aplikacji
 showMenu();
 </script>
 </body>
